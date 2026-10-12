@@ -1,0 +1,49 @@
+{
+  "_format": "hh3-sol-build-info-1",
+  "id": "solc-0_8_34-7dc373c8735df947a677b2f6fee9fccc3383863b",
+  "solcVersion": "0.8.34",
+  "solcLongVersion": "0.8.34+commit.80d5c536",
+  "compilerType": "solc",
+  "toolVersions": {
+    "hardhat": "3.18.0"
+  },
+  "userSourceNameMap": {
+    "contracts/MedicalRecord.sol": "project/contracts/MedicalRecord.sol"
+  },
+  "input": {
+    "language": "Solidity",
+    "settings": {
+      "evmVersion": "osaka",
+      "optimizer": {
+        "enabled": true,
+        "runs": 200
+      },
+      "outputSelection": {
+        "*": {
+          "": [
+            "ast"
+          ],
+          "*": [
+            "abi",
+            "evm.bytecode.linkReferences",
+            "evm.bytecode.object",
+            "evm.bytecode.opcodes",
+            "evm.bytecode.sourceMap",
+            "evm.deployedBytecode.immutableReferences",
+            "evm.deployedBytecode.linkReferences",
+            "evm.deployedBytecode.object",
+            "evm.deployedBytecode.opcodes",
+            "evm.deployedBytecode.sourceMap",
+            "evm.methodIdentifiers"
+          ]
+        }
+      },
+      "remappings": []
+    },
+    "sources": {
+      "project/contracts/MedicalRecord.sol": {
+        "content": "// SPDX-License-Identifier: MIT\r\npragma solidity ^0.8.28;\r\n\r\ncontract MedicalRecord {\r\n\r\n    struct RecordVersion { \r\n        bytes32 hash;\r\n        uint256 timestamp;\r\n    }\r\n\r\n    mapping(uint256 => RecordVersion[]) private records;\r\n\r\n    event RecordHashStored(\r\n        uint256 indexed patientId,\r\n        bytes32 hash,\r\n        uint256 timestamp,\r\n        uint256 version\r\n    );\r\n\r\n    function storeHash(\r\n        uint256 patientId,\r\n        bytes32 hash\r\n    ) public {\r\n\r\n        records[patientId].push(\r\n            RecordVersion({\r\n                hash: hash,\r\n                timestamp: block.timestamp\r\n            })\r\n        );\r\n\r\n        emit RecordHashStored(\r\n            patientId,\r\n            hash,\r\n            block.timestamp,\r\n            records[patientId].length\r\n        );\r\n    }\r\n\r\n    function getLatestHash(\r\n        uint256 patientId\r\n    ) public view returns (bytes32) {\r\n\r\n        require(\r\n            records[patientId].length > 0,\r\n            \"No medical record found\"\r\n        );\r\n\r\n        return records[patientId][records[patientId].length - 1].hash;\r\n    }\r\n\r\n    function verifyHash(\r\n        uint256 patientId,\r\n        bytes32 hash\r\n    ) public view returns (bool) {\r\n\r\n        require(\r\n            records[patientId].length > 0,\r\n            \"No medical record found\"\r\n        );\r\n\r\n        return getLatestHash(patientId) == hash;\r\n    }\r\n\r\n    function getVersionCount(\r\n        uint256 patientId\r\n    ) public view returns (uint256) {\r\n\r\n        return records[patientId].length;\r\n    }\r\n\r\n    function getVersion(\r\n        uint256 patientId,\r\n        uint256 version\r\n    )\r\n        public\r\n        view\r\n        returns (bytes32 hash, uint256 timestamp)\r\n    {\r\n        require(\r\n            version > 0 &&\r\n            version <= records[patientId].length,\r\n            \"Invalid version\"\r\n        );\r\n\r\n        RecordVersion memory record =\r\n            records[patientId][version - 1];\r\n\r\n        return (\r\n            record.hash,\r\n            record.timestamp\r\n        );\r\n    }\r\n}"
+      }
+    }
+  }
+}
